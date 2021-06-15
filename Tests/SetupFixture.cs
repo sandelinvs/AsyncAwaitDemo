@@ -3,7 +3,7 @@
 namespace Tests
 {
     [TestFixture]
-    public class SetupFixture
+    public abstract class SetupFixture
     {
         [SetUp]
         public virtual void BeforeEach()
@@ -20,13 +20,13 @@ namespace Tests
         [OneTimeSetUp]
         public virtual void BeforeAll()
         {
-            TestContext.WriteLine("BeforeAll");
+            TestContext.WriteLine("BeforeAll"); // does not print to console but does run.
         }
 
         [OneTimeTearDown]
         public virtual void AfterAll()
         {
-            TestContext.WriteLine("AfterAll");
+            TestContext.WriteLine("AfterAll"); // same as above
         }
     }
 }
