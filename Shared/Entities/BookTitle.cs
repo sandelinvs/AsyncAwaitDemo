@@ -14,5 +14,10 @@ namespace Shared
         public string AuthorUrl { get; set; }
 
         public string CoverArtUrl { get; set; }
+
+        public override string ToString()
+        {
+            return Title + " by " + Author;
+        }
     }
 }

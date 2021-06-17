@@ -35,7 +35,7 @@ namespace Tests
 
             Console.WriteLine(result);
 
-            IBookListParser parser = new SFBokhandelnBookListParser();
+            IBookListParser parser = new SFBokBookListParser();
 
             var titles = parser.Parse(result);
 

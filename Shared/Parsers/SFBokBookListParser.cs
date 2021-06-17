@@ -4,7 +4,7 @@ using HtmlAgilityPack;
 
 namespace Shared
 {
-    public class SFBokhandelnBookListParser : IBookListParser
+    public class SFBokBookListParser : IBookListParser
     {
         public IEnumerable<BookTitle> Parse(string html)
         {
@@ -13,12 +13,11 @@ namespace Shared
             doc.LoadHtml(html);
 
             var titles = from article in doc.DocumentNode.Descendants("article")
-                         where article.Attributes.Any(a => a.Name == "class")
-                         let @class = article.GetAttributeValue("class", null)
+                         let @class = article.GetAttributeValue("class", "")
                          where @class.Contains("volume")
-                         let covertArtUrl = article.GetCoverArtUrl()
-                         let titleInfo = article.GetBookInfo()
-                         let authorInfo = article.GetAuthorInfo()
+                         let covertArtUrl = article.ToCoverArtUrl()
+                         let titleInfo = article.ToBookInfo()
+                         let authorInfo = article.ToAuthorInfo()
                          select new BookTitle
                          {
                              Author = authorInfo.authorName,

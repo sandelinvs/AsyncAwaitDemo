@@ -3,6 +3,7 @@
 namespace Shared
 {
 
+    // redundant?
     public class HtmlDownloaderFactory : IHtmlDownloaderFactory
     {
         private readonly HttpClient _httpClient;

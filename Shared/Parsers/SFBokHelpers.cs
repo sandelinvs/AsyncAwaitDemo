@@ -5,9 +5,14 @@ using HtmlAgilityPack;
 
 namespace Shared
 {
-    internal static class Helpers
+    /// <summary>
+    /// jag tänker väl att det går att göra detta snabbare(mindre kod) med xpath,
+    /// men jag tycker inte att det är så givande för att få in kodvanan; 
+    /// Html Agility pack har även stöd för xpath i combo med linq
+    /// </summary>
+    internal static class SFBokHelpers
     {
-        public static string GetCoverArtUrl(this HtmlNode article)
+        public static string ToCoverArtUrl(this HtmlNode article)
         {
             var covertArt = (from img in article.Descendants("img")
                              where img.GetClasses().Contains("img-responsive")
@@ -19,7 +24,7 @@ namespace Shared
             return decoded;
         }
 
-        public static (string bookTitle, string bookUrl) GetBookInfo(this HtmlNode article)
+        public static (string bookTitle, string bookUrl) ToBookInfo(this HtmlNode article)
         {
             var title = (from a in article.Descendants("a")
                          where a.ParentNode.Name == "h2"
@@ -32,7 +37,7 @@ namespace Shared
             return (title.BookTitle, title.BookUrl);
         }
 
-        public static (string authorName, string authorUrl) GetAuthorInfo(this HtmlNode article)
+        public static (string authorName, string authorUrl) ToAuthorInfo(this HtmlNode article)
         {
             var author = (from a in article.Descendants("a")
                           where a.ParentNode.Name == "div" && a.ParentNode.GetClasses().Contains("author")
