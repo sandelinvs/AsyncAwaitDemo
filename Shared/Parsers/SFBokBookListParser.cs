@@ -13,8 +13,7 @@ namespace Shared
             doc.LoadHtml(html);
 
             var titles = from article in doc.DocumentNode.Descendants("article")
-                         let @class = article.GetAttributeValue("class", "")
-                         where @class.Contains("volume")
+                         where article.GetClasses().Contains("volume")
                          let covertArtUrl = article.ToCoverArtUrl()
                          let titleInfo = article.ToBookInfo()
                          let authorInfo = article.ToAuthorInfo()
