@@ -1,67 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
 
 namespace Shared
 {
-    public class BookTitle
-    {
-        public string Title { get; set; }
-
-        public string TitleUrl { get; set; }
-
-        public string Author { get; set; }
-
-        public string AuthorUrl { get; set; }
-
-        public string CoverArtUrl { get; set; }
-    }
-
-    public interface IBookListParser
-    {
-        IEnumerable<BookTitle> Parse(string html);
-    }
-
-    public class SFBokhandelnBookListParser : IBookListParser
-    {
-        public IEnumerable<BookTitle> Parse(string html)
-        {
-            var doc = new HtmlDocument();
-
-            doc.LoadHtml(html);
-
-            var titles = from article in doc.DocumentNode.Descendants("article")
-                         where article.Attributes.Any(a => a.Name == "class")
-                         let @class = article.GetAttributeValue("class", null)
-                         where @class.Contains("volume")
-                         let covertArtUrl = article.GetCoverArtUrl()
-                         let titleInfo = article.GetBookInfo()
-                         let authorInfo = article.GetAuthorInfo()
-                         select new BookTitle
-                         {
-                             Author = authorInfo.authorName,
-                             AuthorUrl = authorInfo.authorUrl,
-                             Title = titleInfo.bookTitle,
-                             TitleUrl = titleInfo.bookUrl,
-                             CoverArtUrl = covertArtUrl
-                         };
-
-            return titles.ToList();
-        }
-
-        
-
-        
-
-        
-
-        
-    }
-
     internal static class Helpers
     {
         public static string GetCoverArtUrl(this HtmlNode article)
