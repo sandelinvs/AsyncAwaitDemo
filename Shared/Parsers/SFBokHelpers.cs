@@ -5,11 +5,6 @@ using HtmlAgilityPack;
 
 namespace Shared
 {
-    /// <summary>
-    /// jag tänker väl att det går att göra detta snabbare(mindre kod) med xpath,
-    /// men jag tycker inte att det är så givande för att få in kodvanan; 
-    /// Html Agility pack har även stöd för xpath i combo med linq
-    /// </summary>
     internal static class SFBokHelpers
     {
         public static string ToCoverArtUrl(this HtmlNode article)
