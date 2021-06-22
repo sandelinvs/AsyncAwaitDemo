@@ -12,23 +12,20 @@ namespace Shared.Sources
 
     public class StreamCopyMachine : IStreamCopyMachine
     {
-        private readonly IAsyncFileSource _asyncSource;
-        private readonly IFileSource _source;
+        private readonly IAsyncFileSource _source;
+        private readonly IAsyncFileSource _destination;
 
-        private readonly IAsyncFileSource _asyncDestination;
-        private readonly IFileSource _destination;
-
-        public StreamCopyMachine(IAsyncFileSource source, IFileSource destination)
+        public StreamCopyMachine(IAsyncFileSource source, IAsyncFileSource destination)
         {
-            _asyncSource = source;
+            _source = source;
             _destination = destination;
         }
 
         public async Task Save(CancellationToken cancellationToken)
         {
-            Stream src = await _asyncSource.GetStreamAsync(cancellationToken);
+            Stream src = await _source.GetStreamAsync(cancellationToken);
 
-            Stream dst = _destination.GetStream();
+            Stream dst = await _destination.GetStreamAsync(cancellationToken);
 
             await src.CopyToAsync(dst, cancellationToken);
         }

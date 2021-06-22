@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
-    public sealed class FileSystemSource : IFileSource, IAsyncFileSource, IDisposable, IAsyncDisposable
+    public sealed class FileSystemSource : IAsyncFileSource, IDisposable, IAsyncDisposable
     {
         private readonly FileStream _fileStream;
 
@@ -17,11 +17,6 @@ namespace Shared.Sources
                 FileShare.None,
                 4096, 
                 FileOptions.Asynchronous);
-        }
-
-        public Stream GetStream()
-        {
-            return _fileStream;
         }
 
         public async Task<Stream> GetStreamAsync(CancellationToken cancellation = default)
