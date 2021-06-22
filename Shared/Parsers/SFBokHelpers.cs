@@ -23,26 +23,24 @@ namespace Shared
         {
             var title = (from a in article.Descendants("a")
                          where a.ParentNode.Name == "h2"
-                         select new
-                         {
-                             BookTitle = a.InnerText.Trim(),
-                             BookUrl = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""))
-                         }).FirstOrDefault();
+                         let bookTitle = a.InnerText.Trim()
+                         let bookUrl = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""))
+                         select (bookTitle, bookUrl))
+                         .FirstOrDefault();
 
-            return (title.BookTitle, title.BookUrl);
+            return title;
         }
 
         public static (string authorName, string authorUrl) ToAuthorInfo(this HtmlNode article)
         {
             var author = (from a in article.Descendants("a")
                           where a.ParentNode.Name == "div" && a.ParentNode.GetClasses().Contains("author")
-                          select new
-                          {
-                              AuthorName = a.InnerText.Trim(),
-                              AuthorUrl = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""))
-                          }).FirstOrDefault();
+                          let authorName = a.InnerText.Trim()
+                          let authorUrl = HttpUtility.HtmlDecode(a.GetAttributeValue("href", ""))
+                          select (authorName, authorUrl))
+                          .FirstOrDefault();
 
-            return (author.AuthorName, author.AuthorUrl);
+            return author;
         }
     }
 }

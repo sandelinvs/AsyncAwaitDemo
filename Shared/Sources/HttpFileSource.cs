@@ -9,15 +9,17 @@ namespace Shared.Sources
     public sealed class HttpFileSource : IAsyncFileSource, IDisposable, IAsyncDisposable
     {
         private readonly HttpClient _httpClient;
-        private readonly bool _needsDispose;
+        
         private readonly string _url;
+
+        private bool _needsDispose;
 
         public HttpFileSource(string url, HttpClient httpClient = default)
         {
             if (httpClient == default)
             {
-                _needsDispose = true;
                 _httpClient = new HttpClient();
+                _needsDispose = true;
             }
             else 
             {
@@ -45,7 +47,10 @@ namespace Shared.Sources
         public async ValueTask DisposeAsync()
         {
             if (_needsDispose)
+            {
                 _httpClient.Dispose();
+                _needsDispose = false;
+            }
 
             await Task.CompletedTask;
         }

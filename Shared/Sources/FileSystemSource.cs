@@ -9,6 +9,8 @@ namespace Shared.Sources
     {
         private readonly FileStream _fileStream;
 
+        private bool _disposed;
+
         public FileSystemSource(string fileName)
         {
             _fileStream = new FileStream(fileName, 
@@ -26,12 +28,26 @@ namespace Shared.Sources
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+
             _fileStream.Dispose();
+
+            _disposed = true;
         }
 
         public async ValueTask DisposeAsync()
         {
-            await _fileStream.DisposeAsync();
+            if (_disposed)
+            {
+                await Task.CompletedTask;
+            }
+            else 
+            {
+                _disposed = true;
+
+                await _fileStream.DisposeAsync();
+            }
         }
     }
 }
