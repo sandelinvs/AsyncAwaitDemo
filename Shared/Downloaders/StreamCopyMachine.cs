@@ -7,7 +7,7 @@ namespace Shared.Sources
 
     public interface IStreamCopyMachine
     {
-        Task Save(CancellationToken cancellationToken);
+        Task Copy(CancellationToken cancellationToken);
     }
 
     public class StreamCopyMachine : IStreamCopyMachine
@@ -21,7 +21,7 @@ namespace Shared.Sources
             _destination = destination;
         }
 
-        public async Task Save(CancellationToken cancellationToken)
+        public async Task Copy(CancellationToken cancellationToken)
         {
             Stream src = await _source.GetStreamAsync(cancellationToken);
 

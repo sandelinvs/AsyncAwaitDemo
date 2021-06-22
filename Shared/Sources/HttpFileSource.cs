@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
-    public sealed class HttpFileSource : IAsyncFileSource
+    public sealed class HttpFileSource : IAsyncFileSource, IDisposable, IAsyncDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly bool _needsDispose;
@@ -39,6 +40,14 @@ namespace Shared.Sources
         {
             if (_needsDispose)
                 _httpClient.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_needsDispose)
+                _httpClient.Dispose();
+
+            await Task.CompletedTask;
         }
     }
 }
