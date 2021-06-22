@@ -17,57 +17,6 @@ namespace Tests
     public class Tests
     {
         const string BOOKSTORE_URL = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
-
-        private static HttpClient Client = new HttpClient();
-
-        [Test]
-        public async Task Can_download_some_html()
-        {
-            IHtmlDownloader downloader = new HtmlDownloader(Client);
-
-            string result = await downloader.Download(BOOKSTORE_URL);
-
-            Console.WriteLine(result);
-
-            Assert.Pass();
-        }
-
-
-        [Test]
-        public async Task Can_parse_some_html_from_SFBokhandeln()
-        {
-            IHtmlDownloader downloader = new HtmlDownloader(Client);
-
-            string result = await downloader.Download(BOOKSTORE_URL);
-
-            Console.WriteLine(result);
-
-            IBookListParser parser = new SFBokBookListParser();
-
-            var titles = parser.Parse(result);
-
-            Assert.Pass();
-        }
-
-        [Test]
-        public void Test()
-        {
-            var uri = new Uri(new Uri("http://www.google.com/absol/dfds"), "/file/something");
-
-            Console.WriteLine(uri.AbsoluteUri);
-
-            var i = 5;
-
-            Console.WriteLine(i += 5);
-        }
-
-
-    }
-
-    [TestFixture]
-    public class CopyMachineTests
-    {
-        const string BOOKSTORE_URL = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
         const string BOOKSTORE_IMAGE_URL = @"https://www.sfbok.se/sites/default/files/styles/teaser/sfbok/sfbokbilder/403/403426.jpg?bust=1624032882&itok=WJ8Bb2y1";
 
         private static HttpClient Client = new HttpClient();
