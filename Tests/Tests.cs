@@ -41,5 +41,17 @@ namespace Tests
 
             Assert.Pass();
         }
+
+        [Test]
+        public void Test()
+        {
+            var uri = new Uri(new Uri("http://www.google.com/absol/dfds"), "/file/something");
+
+            Console.WriteLine(uri.AbsoluteUri);
+
+            var i = 5;
+
+            Console.WriteLine(i += 5);
+        }
     }
 }

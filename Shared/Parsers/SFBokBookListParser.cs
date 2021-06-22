@@ -14,7 +14,7 @@ namespace Shared
 
             var titles = from article in doc.DocumentNode.Descendants("article")
                          where article.GetClasses().Contains("volume")
-                         let covertArtUrl = article.ToCoverArtUrl()
+                         let coverArtUrl = article.ToCoverArtUrl()
                          let titleInfo = article.ToBookInfo()
                          let authorInfo = article.ToAuthorInfo()
                          select new BookTitle
@@ -23,18 +23,10 @@ namespace Shared
                              AuthorUrl = authorInfo.authorUrl,
                              Title = titleInfo.bookTitle,
                              TitleUrl = titleInfo.bookUrl,
-                             CoverArtUrl = covertArtUrl
+                             CoverArtUrl = coverArtUrl
                          };
 
             return titles.ToList();
         }
-
-        
-
-        
-
-        
-
-        
     }
 }
