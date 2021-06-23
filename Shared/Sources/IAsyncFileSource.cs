@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
-    public interface IAsyncFileSource
+    public interface IAsyncFileSource : IDisposable, IAsyncDisposable
     {
         Task<Stream> GetStreamAsync(CancellationToken cancellationToken);
     }

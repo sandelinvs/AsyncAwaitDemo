@@ -29,28 +29,83 @@ namespace Shared.Persistance
         }
     }
 
-    public class CovertArtDownloader
+    public class DownloadEventArgs : EventArgs 
+    {
+        public string Url { get; set; }
+
+        public string LocalPath { get; set; }
+    }
+
+    public class Downloader : IDisposable, IAsyncDisposable
     {
         private readonly IStreamCopy _copier;
 
-        public CovertArtDownloader(IStreamCopy copier)
+        public delegate Task DownloadHandler(Downloader sender, DownloadEventArgs e);
+
+        public event DownloadHandler OnComplete;
+        public event DownloadHandler OnStart;
+
+        public string Url { get; }
+
+        public string LocalPath { get; }
+
+        public Downloader(IStreamCopy copier, string url, string localPath)
         {
             _copier = copier;
+            Url = url;
+            LocalPath = localPath;
         }
 
         public async Task Download(CancellationToken cancellationToken)
         {
+            if(OnStart is not null)
+                await OnStart(this, new DownloadEventArgs { Url = Url, LocalPath = Url });
+
             await _copier.Copy(cancellationToken);
+
+            if(OnComplete is not null)
+                await OnComplete(this, new DownloadEventArgs { Url = Url, LocalPath = Url });
+        }
+
+        public void Dispose()
+        {
+            _copier.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _copier.DisposeAsync();
+        }
+
+        public static async Task DownloadAll(IEnumerable<Downloader> downloaders, CancellationToken cancellationToken)
+        {
+            await Task.Run(() => Parallel.ForEach(downloaders,
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 3,
+                    CancellationToken = cancellationToken
+                },
+                async (dl, state) =>
+                {
+                    try
+                    {
+                        await dl.Download(cancellationToken);
+                    }
+                    catch 
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }));
         }
     }
 
-    public class CovertArtDownloaderFactory
+    public class DownloaderFactory
     {
         private readonly Func<string, IAsyncFileSource> _httpFileSourceFactory;
         private readonly Func<string, IAsyncFileSource> _fileSystemSourceFactory;
         private readonly Func<IAsyncFileSource, IAsyncFileSource, IStreamCopy> _streamCopyFactory;
 
-        public CovertArtDownloaderFactory(
+        public DownloaderFactory(
             Func<string, IAsyncFileSource> httpFileSourceFactory,
             Func<string, IAsyncFileSource> fileSystemSourceFactory,
             Func<IAsyncFileSource, IAsyncFileSource, IStreamCopy> streamCopyFactory)
@@ -60,7 +115,7 @@ namespace Shared.Persistance
             _streamCopyFactory = streamCopyFactory;
         }
 
-        public async Task<CovertArtDownloader> Create(string url, string localPath) 
+        public async Task<Downloader> Create(string url, string localPath) 
         {
             IAsyncFileSource source = _httpFileSourceFactory(url);
 
@@ -68,7 +123,7 @@ namespace Shared.Persistance
 
             IStreamCopy copier = _streamCopyFactory(source, destination);
 
-            CovertArtDownloader downloader = new CovertArtDownloader(copier);
+            Downloader downloader = new Downloader(copier, url, localPath);
 
             return await Task.FromResult(downloader);
         }

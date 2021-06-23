@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
 
-    public interface IStreamCopy
+    public interface IStreamCopy : IDisposable, IAsyncDisposable
     {
         Task Copy(CancellationToken cancellationToken);
     }
@@ -28,6 +29,18 @@ namespace Shared.Sources
             await using Stream dst = await _destination.GetStreamAsync(cancellationToken);
 
             await src.CopyToAsync(dst, cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            _source.Dispose();
+            _destination.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _source.DisposeAsync();
+            await _destination.DisposeAsync();
         }
     }
 }

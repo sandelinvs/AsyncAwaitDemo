@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
-    public class MemorySource : IAsyncFileSource, IDisposable, IAsyncDisposable
+    public class MemorySource : IAsyncFileSource
     {
         private readonly MemoryStream _stream;
 
