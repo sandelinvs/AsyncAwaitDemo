@@ -26,7 +26,7 @@ namespace Shared.Services
             LocalPath = localPath;
         }
 
-        public async Task Download(CancellationToken cancellationToken)
+        public async Task DownloadAsync(CancellationToken cancellationToken)
         {
             if(OnStart is not null)
                 await OnStart(this, new DownloadEventArgs { Url = Url, LocalPath = Url });
@@ -59,7 +59,7 @@ namespace Shared.Services
                 {
                     try
                     {
-                        await dl.Download(cancellationToken);
+                        await dl.DownloadAsync(cancellationToken);
                     }
                     catch 
                     {

@@ -59,4 +59,21 @@ namespace Tests
             await new StreamCopy(source, destination).Copy();
         }
     }
+
+    [TestFixture]
+    public class DownloaderTests
+    {
+        [SetUp]
+        public void Setup()
+        { 
+        }
+
+        [TearDown]
+        public void TearDown()
+        { 
+        }
+
+        const string BOOKSTORE_URL = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
+        const string BOOKSTORE_IMAGE_URL = @"https://www.sfbok.se/sites/default/files/styles/teaser/sfbok/sfbokbilder/403/403426.jpg?bust=1624032882&itok=WJ8Bb2y1";
+    }
 }
