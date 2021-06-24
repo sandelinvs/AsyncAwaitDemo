@@ -4,7 +4,7 @@ using Shared.Sources;
 
 namespace Shared.Services
 {
-    public class DownloaderFactory
+    public class DownloaderFactory : IDownloaderFactory
     {
         private readonly Func<string, IAsyncFileSource> _httpFileSourceFactory;
         private readonly Func<string, IAsyncFileSource> _fileSystemSourceFactory;
@@ -20,7 +20,7 @@ namespace Shared.Services
             _streamCopyFactory = streamCopyFactory;
         }
 
-        public async Task<Downloader> Create(string url, string localPath) 
+        public async Task<IDownloader> Create(string url, string localPath)
         {
             IAsyncFileSource source = _httpFileSourceFactory(url);
 

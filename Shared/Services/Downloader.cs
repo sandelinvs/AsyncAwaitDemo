@@ -6,11 +6,13 @@ using Shared.Sources;
 
 namespace Shared.Services
 {
-    public class Downloader : IDisposable, IAsyncDisposable
+    public delegate Task DownloadHandler(Downloader sender, DownloadEventArgs e);
+
+    public class Downloader : IDownloader
     {
         private readonly IStreamCopy _copier;
 
-        public delegate Task DownloadHandler(Downloader sender, DownloadEventArgs e);
+        
 
         public event DownloadHandler OnComplete;
         public event DownloadHandler OnStart;
@@ -26,14 +28,14 @@ namespace Shared.Services
             LocalPath = localPath;
         }
 
-        public async Task DownloadAsync(CancellationToken cancellationToken)
+        public async Task DownloadAsync(CancellationToken cancellationToken = default)
         {
-            if(OnStart is not null)
+            if (OnStart is not null)
                 await OnStart(this, new DownloadEventArgs { Url = Url, LocalPath = Url });
 
             await _copier.Copy(cancellationToken);
 
-            if(OnComplete is not null)
+            if (OnComplete is not null)
                 await OnComplete(this, new DownloadEventArgs { Url = Url, LocalPath = Url });
         }
 
@@ -61,7 +63,7 @@ namespace Shared.Services
                     {
                         await dl.DownloadAsync(cancellationToken);
                     }
-                    catch 
+                    catch
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                     }
