@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,45 +15,47 @@ using Shared.Sources;
 
 namespace Tests
 {
-    [TestFixture]
-    public class Tests
-    {
-        const string BOOKSTORE_URL = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
+    //[TestFixture]
+    //public class Tests
+    //{
+    //    const string BOOKSTORE_URL = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
 
-        private static HttpClient Client = new HttpClient();
+    //    private static HttpClient Client = new HttpClient();
 
-        [Test]
-        public async Task Can_download_and_parse_some_html()
-        {
-            byte[] buffer = new byte[1024 * 10 * 10 * 10];
+    //    [Test]
+    //    public async Task Can_download_and_parse_some_html()
+    //    {
+    //        byte[] buffer = new byte[1024 * 10 * 10 * 10];
 
-            await using var source = new HttpFileSource(BOOKSTORE_URL, Client);
+    //        await using var source = new HttpFileSource(BOOKSTORE_URL, Client);
 
-            await using var destination = new MemorySource(buffer);
+    //        await using var destination = new MemorySource(buffer);
 
-            await new StreamCopy(source, destination).Copy();
+    //        await new StreamCopy(source, destination).Copy();
 
-            string result = Encoding.Default.GetString(buffer);
+    //        string result = Encoding.Default.GetString(buffer);
 
-            IBookListParser parser = new SFBokBookListParser();
+    //        IBookListParser parser = new SFBokBookListParser();
 
-            IEnumerable<BookTitle> titles = parser.Parse(result);
+    //        IEnumerable<BookTitle> titles = parser.Parse(result);
 
-            Assert.IsNotEmpty(titles);
-            Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().Author));
-            Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().AuthorUrl));
-            Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().Title));
-            Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().TitleUrl));
-            Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().CoverArtUrl));
-        }
+    //        Assert.IsNotEmpty(titles);
+    //        Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().Author));
+    //        Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().AuthorUrl));
+    //        Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().Title));
+    //        Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().TitleUrl));
+    //        Assert.IsFalse(String.IsNullOrWhiteSpace(titles.First().CoverArtUrl));
+    //    }
 
-    }
+    //}
 
     [TestFixture]
     public class DownloaderSetupFixture
     {
         protected IHttpClientFactory HttpClientFactory;
         protected DownloaderFactory DownloaderFactory;
+
+        protected string LocalFolder => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Downloads");
 
         public virtual IAsyncFileSource HttpSourceFileFactory(string url)
         {
@@ -69,11 +72,21 @@ namespace Tests
             return new StreamCopy(source, destination);
         }
 
+        [OneTimeSetUp]
+        public virtual void OneTimeSetup()
+        {
+            if (!Directory.Exists(LocalFolder))
+                Directory.CreateDirectory(LocalFolder);
+        }
+
         [SetUp]
         public virtual void Setup()
         {
             HttpClientFactory = new HttpClientFactory();
             DownloaderFactory = new DownloaderFactory(HttpSourceFileFactory, FileSystemSourceFactory, StreamCopyFactory);
+
+            Downloader.OnStart += OnStart;
+            Downloader.OnComplete += OnComplete;
         }
 
         [TearDown]
@@ -82,47 +95,41 @@ namespace Tests
             HttpClientFactory.Dispose();
             HttpClientFactory = null;
             DownloaderFactory = null;
+
+            Downloader.OnStart -= OnStart;
+            Downloader.OnComplete -= OnComplete;
+        }
+
+        public static async void OnStart(object sender, DownloadEventArgs args)
+        {
+            TestContext.WriteLine($"Download started: {args.Url}");
+        }
+
+        public static async void OnComplete(object sender, DownloadEventArgs args)
+        {
+            TestContext.WriteLine($"Download Completed: {args.Url}");
         }
     }
 
     [TestFixture]
     public class DownloaderTests : DownloaderSetupFixture
     {
-        public const string BookStoreUrl = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller";
-        public const string BookStoreImageUrl = @"https://www.sfbok.se/sites/default/files/styles/teaser/sfbok/sfbokbilder/403/403426.jpg?bust=1624032882&itok=WJ8Bb2y1";
-
-        public string LocalFolder => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-        public static async Task OnStart(object sender, DownloadEventArgs args)
-        {
-            TestContext.WriteLine($"Download started: {args.Url}");
-            await Task.CompletedTask;
-        }
-
-        public static async Task OnComplete(object sender, DownloadEventArgs args)
-        {
-            TestContext.WriteLine($"Download Completed: {args.Url}");
-            await Task.CompletedTask;
-        }
-
         [Test]
-        public async Task Can_Download_booklist()
+        public async Task Can_Download_booklistpage_to_disk()
         {
-            using var downloader = await DownloaderFactory.Create(BookStoreUrl, Path.Combine(LocalFolder, "booklist.html"));
+            var bookStoreUrl = @"https://www.sfbok.se/katalog/bocker-tidningar/romaner-noveller"; ;
 
-            downloader.OnStart += OnStart;
-            downloader.OnComplete += OnComplete;
+            using var downloader = await DownloaderFactory.Create(bookStoreUrl, Path.Combine(LocalFolder, "booklist.html"));
 
             await downloader.DownloadAsync();
         }
 
         [Test]
-        public async Task Can_Download_a_book_cover()
+        public async Task Can_Download_a_bookcover_to_disk()
         {
-            using var downloader = await DownloaderFactory.Create(BookStoreImageUrl, Path.Combine(LocalFolder, "covertart.jpg"));
+            var bookStoreImageUrl = @"https://www.sfbok.se/sites/default/files/styles/teaser/sfbok/sfbokbilder/403/403426.jpg?bust=1624032882&itok=WJ8Bb2y1";
 
-            downloader.OnStart += OnStart;
-            downloader.OnComplete += OnComplete;
+            using var downloader = await DownloaderFactory.Create(bookStoreImageUrl, Path.Combine(LocalFolder, "covertart.jpg"));
 
             await downloader.DownloadAsync();
         }

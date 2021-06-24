@@ -9,9 +9,6 @@ namespace Shared.Services
         string LocalPath { get; }
         string Url { get; }
 
-        event DownloadHandler OnComplete;
-        event DownloadHandler OnStart;
-
         Task DownloadAsync(CancellationToken cancellationToken = default);
     }
 }

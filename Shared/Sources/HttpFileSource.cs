@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Sources
 {
-    public sealed class HttpFileSource : IAsyncFileSource, IDisposable, IAsyncDisposable
+    public sealed class HttpFileSource : IAsyncFileSource
     {
         private readonly HttpClient _httpClient;
         
